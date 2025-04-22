@@ -26,7 +26,7 @@ export default async function BlogPage() {
     const data: Blog[] = await getData();
 
     return (
-        <Container className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Container className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {data.map((post) => (
                 <Card key={post.currentSlug}>
                     {post.titleImage && (

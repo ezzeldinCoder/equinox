@@ -1,3 +1,4 @@
+import { Container } from "@/components/container";
 import type { fullBlog } from "@/lib/interface";
 import { client, urlFor } from "@/lib/sanity";
 import { PortableText } from "@portabletext/react";
@@ -27,7 +28,7 @@ export default async function BlogArticle({
   const data: fullBlog = await getData(params.slug);
 
   return (
-    <div className="mt-8 max-w-2xl mx-auto px-8">
+    <Container className="max-w-7xl mx-auto px-8 flex flex-col items-center justify-center">
       <h1>
         <span className="block text-base text-center text-primary font-semibold tracking-wide uppercase">
           Equinox - Blog
@@ -49,6 +50,6 @@ export default async function BlogArticle({
       <div className="mt-16 prose prose-blue prose-lg dark:prose-invert prose-li:marker:text-primary prose-a:text-primary">
         <PortableText value={data.content as PortableTextBlock[]} />
       </div>
-    </div>
+    </Container>
   );
 }
