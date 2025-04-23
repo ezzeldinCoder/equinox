@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CommandPalette } from "./command-palette";
 import { NonMobileWrapper } from "./helper/non-mobile-wrapper";
+import { UpdatesModal } from "./updates-modal";
 
 export function Navbar() {
   return (
@@ -18,7 +19,8 @@ export function Navbar() {
 
       <div className="flex items-center gap-2">
         {/* <ThemeSwitcher /> */}
-        <NonMobileWrapper>
+        <NonMobileWrapper className="flex items-center gap-2">
+          <UpdatesModal />
           <CommandPalette />
         </NonMobileWrapper>
       </div>
