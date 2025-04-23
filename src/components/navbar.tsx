@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CommandPalette } from "./command-palette";
+import { NonMobileWrapper } from "./helper/non-mobile-wrapper";
 
 export function Navbar() {
   return (
@@ -17,7 +18,9 @@ export function Navbar() {
 
       <div className="flex items-center gap-2">
         {/* <ThemeSwitcher /> */}
-        <CommandPalette />
+        <NonMobileWrapper>
+          <CommandPalette />
+        </NonMobileWrapper>
       </div>
     </nav>
   );

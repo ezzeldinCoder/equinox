@@ -27,11 +27,11 @@ export function CommandPalette() {
         e.preventDefault();
         setOpen((open) => !open);
       }
-      if (e.key === "d" && e.altKey && (e.metaKey || e.ctrlKey)) {
+      if (e.key === "d") {
         e.preventDefault();
         setTheme("dark");
       }
-      if (e.key === "l" && e.altKey && (e.metaKey || e.ctrlKey)) {
+      if (e.key === "l") {
         e.preventDefault();
         setTheme("light");
       }
@@ -93,7 +93,7 @@ export function CommandPalette() {
             >
               <Moon />
               <span>Dark Mode</span>
-              <CommandShortcut>⌘ + alt + D</CommandShortcut>
+              <CommandShortcut>D</CommandShortcut>
             </CommandItem>
             <CommandItem
               onSelect={() => {
@@ -103,7 +103,7 @@ export function CommandPalette() {
             >
               <Sun />
               <span>Light Mode</span>
-              <CommandShortcut>⌘ + alt + L</CommandShortcut>
+              <CommandShortcut>L</CommandShortcut>
             </CommandItem>
           </CommandGroup>
         </CommandList>
