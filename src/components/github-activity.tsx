@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Loader2,
@@ -8,6 +8,7 @@ import {
   GitPullRequest,
   GitMerge,
   GitBranch,
+  RefreshCw,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -72,27 +73,48 @@ export function GithubActivity({
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  useEffect(() => {
-    async function fetchActivity() {
+  const fetchGitHubActivity = useCallback(
+    async (silent = false) => {
       try {
-        setLoading(true);
+        if (!silent) {
+          setLoading(true);
+        } else {
+          setIsRefreshing(true);
+        }
         setError(null);
 
-        // In a real implementation, this would call your API endpoint
-        // For example: /api/github/activity?username=${username}&limit=${limit}
-        // For now we'll use the GitHub API directly
+        console.log(`Fetching GitHub activity for ${username}...`);
+
+        // Add timestamp to prevent caching
+        const timestamp = Date.now();
+        // Use our API route instead of calling GitHub directly
+        // This avoids CORS issues since the request happens server-side
         const response = await fetch(
-          `https://api.github.com/users/${username}/events?per_page=${limit}`
+          `/api/github?username=${encodeURIComponent(
+            username
+          )}&limit=${limit}&_=${timestamp}`
         );
 
         if (!response.ok) {
-          throw new Error("Failed to fetch GitHub activity");
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            errorData.error ||
+              `Error: ${response.status} ${response.statusText}`
+          );
         }
 
         const data = (await response.json()) as GithubEvent[];
 
+        // Check if we got any data
+        if (!Array.isArray(data)) {
+          throw new Error("Invalid response from GitHub API");
+        }
+
         // Filter for relevant events (PushEvent, PullRequestEvent)
+        // Events are already sorted by creation date (newest first) from the API
         const filteredData = data
           .filter((item) =>
             ["PushEvent", "PullRequestEvent"].includes(item.type)
@@ -123,6 +145,7 @@ export function GithubActivity({
           .slice(0, limit);
 
         setActivity(filteredData);
+        setLastUpdated(new Date());
       } catch (err) {
         console.error("Error fetching GitHub activity:", err);
         const errorMessage =
@@ -130,11 +153,27 @@ export function GithubActivity({
         setError(errorMessage);
       } finally {
         setLoading(false);
+        setIsRefreshing(false);
       }
-    }
+    },
+    [username, limit]
+  );
 
-    fetchActivity();
-  }, [username, limit]);
+  // Auto-refresh every 5 minutes
+  useEffect(() => {
+    fetchGitHubActivity();
+
+    const refreshInterval = setInterval(() => {
+      fetchGitHubActivity(true); // Silent refresh
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearInterval(refreshInterval);
+  }, [fetchGitHubActivity]);
+
+  // Manual refresh handler
+  const handleRefresh = () => {
+    fetchGitHubActivity(true);
+  };
 
   // Loading state
   if (loading) {
@@ -150,7 +189,16 @@ export function GithubActivity({
     return (
       <Card>
         <CardContent className="p-4 text-center">
-          <p className="text-muted-foreground">{error}</p>
+          <p className="text-muted-foreground mb-4">{error}</p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fetchGitHubActivity()}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Try Again
+          </Button>
         </CardContent>
       </Card>
     );
@@ -161,9 +209,23 @@ export function GithubActivity({
     return (
       <Card>
         <CardContent className="p-4 text-center">
-          <p className="text-muted-foreground">
-            No recent GitHub activity found for {username}.
+          <p className="text-muted-foreground mb-2">
+            No recent GitHub activity found for{" "}
+            <span className="font-medium">{username}</span>.
           </p>
+          <p className="text-xs text-muted-foreground mb-4">
+            Make sure you have public activity on GitHub and check your token
+            configuration.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fetchGitHubActivity()}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Try Again
+          </Button>
         </CardContent>
       </Card>
     );
@@ -172,6 +234,24 @@ export function GithubActivity({
   // Display activity
   return (
     <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <p className="text-xs text-muted-foreground">
+          Last updated: {formatDistanceToNow(lastUpdated, { addSuffix: true })}
+        </p>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="flex items-center gap-1"
+        >
+          <RefreshCw
+            className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`}
+          />
+          {isRefreshing ? "Refreshing..." : "Refresh"}
+        </Button>
+      </div>
+
       {activity.map((item) => (
         <ActivityCard key={item.id} activity={item} />
       ))}
