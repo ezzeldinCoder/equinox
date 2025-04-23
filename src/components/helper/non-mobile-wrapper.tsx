@@ -21,5 +21,5 @@ export const NonMobileWrapper = ({
   className?: string;
 }) => {
   const isMobile = useIsMobile();
-  return <div className={cn(isMobile && "hidden", className)}>{children}</div>;
+  return <div className={cn(className, isMobile && "hidden")}>{children}</div>;
 };

@@ -194,9 +194,9 @@ export function GithubActivity({
             variant="outline"
             size="sm"
             onClick={() => fetchGitHubActivity()}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 w-full"
           >
-            <RefreshCw className="h-3.5 w-3.5" />
+            <RefreshCw className="size-3.5" />
             Try Again
           </Button>
         </CardContent>

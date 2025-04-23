@@ -17,7 +17,7 @@ export function UpdatesModal() {
           <Newspaper />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto rounded-sm">
         <DialogHeader>
           <DialogTitle>Updates</DialogTitle>
         </DialogHeader>
